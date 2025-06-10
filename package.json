@@ -9,8 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.1.1",
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-slot": "^1.2.3",
     "@react-email/components": "^0.0.41",
     "ai": "^4.3.16",
+    "axios": "^1.9.0",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -18,13 +22,17 @@
     "mongoose": "^8.15.1",
     "next": "15.3.3",
     "next-auth": "^4.24.11",
+    "next-themes": "^0.4.6",
     "openai": "^5.1.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-email": "^4.0.16",
+    "react-hook-form": "^7.57.0",
     "resend": "^4.5.2",
+    "sonner": "^2.0.5",
     "tailwind-merge": "^3.3.0",
-    "zod": "^3.25.51"
+    "usehooks-ts": "^3.1.1",
+    "zod": "^3.25.57"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
