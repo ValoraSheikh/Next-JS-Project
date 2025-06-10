@@ -1,85 +1,57 @@
-"use client";
-import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
-import { useDebounceValue } from "usehooks-ts";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { signUpSchema } from "@/Schemas/signUpSchema";
-import axios, { AxiosError } from "axios";
-import { ApiResponse } from "@/types/ApiResponse";
+'use client';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { signIn } from 'next-auth/react';
 import {
   Form,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { signInSchema } from '@/Schemas/signInSchema';
 
-const page = () => {
-  const [username, setsername] = useState("");
-  const [usernameMessage, setusernameMessage] = useState("");
-  const [isCheckingUsername, setisCheckingUsername] = useState(false);
-  const [isSubmitting, setisSubmitting] = useState(false);
-  const debounceUsername = useDebounceValue(username, 300);
-  toast("Event has been created.");
+
+export default function SignInForm() {
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof signUpSchema>>({
-    resolver: zodResolver(signUpSchema),
+  const form = useForm<z.infer<typeof signInSchema>>({
+    resolver: zodResolver(signInSchema),
     defaultValues: {
-      username: "",
-      email: "",
-      password: "",
+      identifier: '',
+      password: '',
     },
   });
 
-  useEffect(() => {
-    const checkUsernameUnique = async () => {
-      if (debounceUsername) {
-        setisCheckingUsername(true);
-        setusernameMessage("");
-        try {
-          const response = await axios.get(
-            `/api/check-username-unique?username=${debounceUsername}`
-          );
-          setusernameMessage(response.data.message);
-        } catch (error) {
-          const axiosError = error as AxiosError<ApiResponse>;
-          setusernameMessage(
-            axiosError.response?.data.message ?? "Error checking username"
-          );
-        } finally {
-          setisCheckingUsername(false);
-        }
+  const onSubmit = async (data: z.infer<typeof signInSchema>) => {
+    const result = await signIn('credentials', {
+      redirect: false,
+      identifier: data.identifier,
+      password: data.password,
+    });
+
+    if (result?.error) {
+      if (result.error === 'CredentialsSignin') {
+        toast('Incorrect username or password');
+      } else {
+        toast(result.error)
       }
-    };
+    }
 
-    checkUsernameUnique();
-  }, [debounceUsername]);
-
-  const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
-    setisSubmitting(true);
-    try {
-      const response = await axios.post<ApiResponse>("/api/sign-up", data);
-      toast(response.data.message);
-      router.replace(`/verify/${username}`);
-      setisSubmitting(false);
-    } catch (error) {
-      console.error("Error in sign up of user".error);
-      const axiosError = error as AxiosError<ApiResponse>;
-      const errorMessage = axiosError.response?.data.message;
-      toast(errorMessage);
-      setisSubmitting(false);
+    if (result?.url) {
+      router.replace('/dashboard');
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-800">
+    <div className="flex justify-center items-center min-h-screen bg-black">
       <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
         <div className="text-center">
           <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
@@ -111,14 +83,12 @@ const page = () => {
                 </FormItem>
               )}
             />
-            <Button className="w-full" type="submit">
-              Sign In
-            </Button>
+            <Button className='w-full' type="submit">Sign In</Button>
           </form>
         </Form>
         <div className="text-center mt-4">
           <p>
-            Not a member yet?{" "}
+            Not a member yet?{' '}
             <Link href="/sign-up" className="text-blue-600 hover:text-blue-800">
               Sign up
             </Link>
@@ -127,6 +97,4 @@ const page = () => {
       </div>
     </div>
   );
-};
-
-export default page;
+}
